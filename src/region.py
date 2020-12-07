@@ -49,7 +49,7 @@ class Region:
             changes_path = self.get_changes(based_on_file)
         except:
             return False
-        
+
         # apply the changes on the last state and bound by polygon using osmosis
         updated_path = apply_changes_by_polygon(self.latest_state_path, changes_path, self.polygon.path, True)
 

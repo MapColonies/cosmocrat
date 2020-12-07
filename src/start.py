@@ -39,6 +39,7 @@ def sleep_til_next_update(closest_update):
     log.info(f'going to sleep until {datetime_to_string(closest_update)}')
     pause.until(closest_update)
 
+# TODO: work with unix times
 def main():
     log.info(f'{config.app_name} started')
     initialize_environment()

@@ -1,0 +1,52 @@
+{
+    "_meta": {
+        "hash": {
+            "sha256": "819d0cc6afac0b81cb7755f9f1b13728e0fb55de673bf8679c78c7f1954f3ecb"
+        },
+        "pipfile-spec": 6,
+        "requires": {
+            "python_version": "3.6"
+        },
+        "sources": [
+            {
+                "name": "pypi",
+                "url": "https://pypi.org/simple",
+                "verify_ssl": true
+            }
+        ]
+    },
+    "default": {
+        "ecs-logging": {
+            "hashes": [
+                "sha256:1d6a202fa618c43b894da5338c7cd94d9e16913c10cd14f2fcb57b181ad3b8ff",
+                "sha256:b44acbb719eb26e74a04ddf169bf6b3792a06cd7abcccd13cc0dd9396dfd440f"
+            ],
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'",
+            "version": "==0.5.0"
+        },
+        "mapcoloniesjsonlogger": {
+            "hashes": [
+                "sha256:a0adc1ccf87cd895fae209ac5c35ea7903a758997687381d1e1abc25986b4e29",
+                "sha256:f63d7f26a4c002dd57333e8d38957532c6cebe5b68876bd7e2625108be198008"
+            ],
+            "index": "pypi",
+            "version": "==1.0.0"
+        },
+        "osmeterium": {
+            "hashes": [
+                "sha256:676ed6b92daf98bf70c0a5857c39eb1aee44a057cba9248859ac62638045e16b",
+                "sha256:6d3ae44fffa03a44c050c9b70ff8a6ecf707d44c6625dcac309b4d88067b4cfc"
+            ],
+            "index": "pypi",
+            "version": "==0.0.1"
+        },
+        "pause": {
+            "hashes": [
+                "sha256:82284ec6213376f718a86a51cf1df04eaa77ce85e349bff63c0071e7db33daba"
+            ],
+            "index": "pypi",
+            "version": "==0.3"
+        }
+    },
+    "develop": {}
+}

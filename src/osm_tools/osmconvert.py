@@ -20,7 +20,6 @@ def get_osm_file_timestamp(file_path):
         return subprocess_get_stdout_output(command)
     except:
         raise
-        # log.error('process raised an error')
 
 def set_osm_file_timestamp(input_path, new_timestamp):
     (dir, name, _, input_format) = deconstruct_file_path(input_path)
