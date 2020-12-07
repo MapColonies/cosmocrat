@@ -1,3 +1,4 @@
+import os
 import re
 import config
 import subprocess
@@ -109,3 +110,6 @@ def get_compression_method(compression, default_format=''):
         compression_type = 'gzip'
         compression_format += '.gz'
     return (compression_type, compression_format)
+
+def grant_permissions(path, permissions=config.DEFAULT_FILE_PERMISSIONS):
+    os.chmod(path, permissions)

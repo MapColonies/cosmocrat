@@ -8,6 +8,7 @@ def clip_polygon(input_path, polygon_path, input_timestamp, output_base_path, ex
     (_, polygon_name, _, _) = deconstruct_file_path(polygon_path)
 
     output_name = f'{input_name}.{polygon_name}.{input_timestamp}.osm.pbf'
+    os.makedirs(output_base_path, exist_ok=True)
     output_path = os.path.join(output_base_path, output_name)
 
     if not exist_ok or not os.path.isfile(output_path):
@@ -19,7 +20,7 @@ def clip_polygon(input_path, polygon_path, input_timestamp, output_base_path, ex
                         -v')
     return output_path
 
-def apply_changes_by_polygon(input_path, change_path, polygon_path, is_compressed=False):
+def apply_changes_by_polygon(base_output_path, input_path, change_path, polygon_path, is_compressed=False):
     (compression_type, _) = get_compression_method(is_compressed)
     (_, input_name, _, _) = deconstruct_file_path(input_path)
     (_, _, changes_timestamps, _) = deconstruct_file_path(change_path)
@@ -28,7 +29,11 @@ def apply_changes_by_polygon(input_path, change_path, polygon_path, is_compresse
     if len(changes_timestamps) is 2:
         changes_timestamps = changes_timestamps[1]
 
-    output_path = os.path.join(config.RESULTS_PATH, f'{input_name}.{changes_timestamps}.osm.pbf')
+    # TODO: remove
+    os.makedirs(base_output_path, exist_ok=True)
+
+    output_path = os.path.join(base_output_path, f'{input_name}.{changes_timestamps}.osm.pbf')
+
     run_command_wrapper(f'{config.OSMOSIS_PATH} \
                     --read-pbf-fast file={input_path} outPipe.0=1 \
                     --read-xml-change compressionMethod={compression_type} file={change_path} outPipe.0=2 \
@@ -38,10 +43,11 @@ def apply_changes_by_polygon(input_path, change_path, polygon_path, is_compresse
                     -v')
     return output_path
 
-def create_delta(delta_name, first_input_pbf_path, second_input_pbf_path, should_compress=False):
+def create_delta(delta_path, delta_name, first_input_pbf_path, second_input_pbf_path, should_compress=False):
     (compression_type, output_format) = get_compression_method(should_compress, default_format='osc')
     output_name = f'{delta_name}.{output_format}'
-    output_path = os.path.join(config.DELTAS_PATH, output_name)
+    os.makedirs(delta_path, exist_ok=True)
+    output_path = os.path.join(delta_path, output_name)
     run_command_wrapper(f'{config.OSMOSIS_PATH} \
                     --read-pbf-fast file={first_input_pbf_path} outPipe.0=1 \
                     --read-pbf-fast file={second_input_pbf_path} outPipe.0=2 \

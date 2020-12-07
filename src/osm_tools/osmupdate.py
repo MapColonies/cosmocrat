@@ -34,8 +34,9 @@ def get_changes_from_timestamp(input_timestamp, change_format='osc'):
 
 def get_changes_from_file(input_path, change_format='osc'):
     temp_output_name = f'{uuid4()}.{change_format}'
-    output_path = os.path.join(config.OSMCHANGES_PATH, change_format, temp_output_name)
 
+    output_path = os.path.join(config.OSMCHANGES_PATH, change_format, temp_output_name)
+    
     run_command_wrapper(f'{config.OSMUPDATE_PATH} \
                     {input_path} \
                     {output_path} \

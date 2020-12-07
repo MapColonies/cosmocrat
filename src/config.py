@@ -11,6 +11,7 @@ OSMUPDATE_PATH='/home/amito/src/osmupdate/osmctools/src/a.out'
 OSMCONVERT_PATH='/home/amito/src/osmconvert/osmconvert'
 
 DEFAULT_SLEEP_INTERVAL=300
+DEFAULT_FILE_PERMISSIONS=0o644
 APP_PATH = '/home/amito/src/cosmocrat'
 DATA_PATH = os.path.join(APP_PATH, 'data')
 POLYGONS_PATH = os.path.join(DATA_PATH, 'polygons')

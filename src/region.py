@@ -1,17 +1,19 @@
+import os
 import config
 
 from datetime import timedelta
 from osm_tools.osmosis import clip_polygon, apply_changes_by_polygon, create_delta
 from osm_tools.osmupdate import get_changes_from_file, get_changes_from_timestamp
 from osm_tools.osmconvert import get_osm_file_timestamp, set_osm_file_timestamp, drop_author
-from helper_functions import deconstruct_file_path, string_to_datetime
+from helper_functions import deconstruct_file_path, string_to_datetime, grant_permissions
 
 class Region:
     def __init__(self, name, polygon, interval, sub_regions=[]):
         self.name = name
         self.polygon = polygon
         self.interval = interval
-        self.sub_regions = sub_regions
+        self.ancestors = []
+        self.set_sub_regions(sub_regions)
         self.latest_state_path = None
         self.second_latest_state_path = None
         self.next_update = None
@@ -30,9 +32,10 @@ class Region:
                 input_path=self.latest_state_path, 
                 polygon_path=sub_region.polygon.path,
                 input_timestamp=timestamp,
-                output_base_path=config.RESULTS_PATH,
+                output_base_path=os.path.join(self.get_ancestors_path(config.RESULTS_PATH), sub_region.polygon.name),
                 exist_ok=True)
             clipped_polygon_path = set_osm_file_timestamp(clipped_polygon_path, timestamp)
+            grant_permissions(clipped_polygon_path)
             sub_region.set_state(clipped_polygon_path, timestamp)
     
     def get_changes(self, based_on_file):
@@ -51,23 +54,32 @@ class Region:
             return False
 
         # apply the changes on the last state and bound by polygon using osmosis
-        updated_path = apply_changes_by_polygon(self.latest_state_path, changes_path, self.polygon.path, True)
+        updated_path = apply_changes_by_polygon(base_output_path=self.get_ancestors_path(config.RESULTS_PATH),
+                                                input_path=self.latest_state_path,
+                                                change_path=changes_path,
+                                                polygon_path=self.polygon.path,
+                                                is_compressed=True)
 
         # set the updated timestamp on the new state based on the changes
         changes_timestamp = get_osm_file_timestamp(changes_path)
         updated_path = set_osm_file_timestamp(updated_path, changes_timestamp)
+
+        grant_permissions(changes_path)
+        grant_permissions(updated_path)
 
         # set the updated state of the region, this will also set the state of the sub-regions and clip their polygons
         self.set_state(updated_path, changes_timestamp)
         return True
 
     def create_states_delta(self):
-        delta_path = create_delta(delta_name=self.get_delta_name(),
-                     first_input_pbf_path=self.second_latest_state_path,
-                     second_input_pbf_path=self.latest_state_path,
-                     should_compress=False)
+        delta_path = create_delta(delta_path=self.get_ancestors_path(config.DELTAS_PATH),
+                    delta_name=self.get_delta_name(),
+                    first_input_pbf_path=self.second_latest_state_path,
+                    second_input_pbf_path=self.latest_state_path,
+                    should_compress=False)
         
         drop_author(delta_path)
+        grant_permissions(delta_path)
         
         for sub_region in self.sub_regions:
             sub_region.create_states_delta()
@@ -94,3 +106,15 @@ class Region:
         if not min or min > self.next_update:
             min = self.next_update
         return min
+
+    def set_sub_regions(self, sub_regions):
+        self.sub_regions = sub_regions
+        for sub_region in sub_regions:
+            sub_region.ancestors.extend(self.ancestors)
+            sub_region.ancestors.append(self.name)
+    
+    def get_ancestors_path(self, base=''):
+        path = base
+        for ancestor in self.ancestors:
+            path = os.path.join(path, ancestor)
+        return os.path.join(path, self.name)
