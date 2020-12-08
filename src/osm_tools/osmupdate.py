@@ -13,7 +13,7 @@ def limit_time_units(time_units=config.TIME_UNITS_IN_USE):
         result += f'--{time_unit} '
     return result
     
-def get_changes_from_timestamp(input_timestamp, change_format='osc'):
+def get_changes_from_timestamp(input_timestamp, change_format=config.FORMATS_MAP['OSC']):
     temp_output_name = f'{uuid4()}.{change_format}'
     output_path = os.path.join(config.OSMCHANGES_PATH, change_format, temp_output_name)
 
@@ -32,7 +32,7 @@ def get_changes_from_timestamp(input_timestamp, change_format='osc'):
     os.rename(output_path, new_output_path)
     return new_output_path
 
-def get_changes_from_file(input_path, change_format='osc'):
+def get_changes_from_file(input_path, change_format=config.FORMATS_MAP['OSC']):
     temp_output_name = f'{uuid4()}.{change_format}'
 
     output_path = os.path.join(config.OSMCHANGES_PATH, change_format, temp_output_name)

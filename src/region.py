@@ -5,7 +5,7 @@ from datetime import timedelta
 from osm_tools.osmosis import clip_polygon, apply_changes_by_polygon, create_delta
 from osm_tools.osmupdate import get_changes_from_file, get_changes_from_timestamp
 from osm_tools.osmconvert import get_osm_file_timestamp, set_osm_file_timestamp, drop_author
-from helper_functions import deconstruct_file_path, string_to_datetime, grant_permissions
+from helper_functions import deconstruct_file_path, string_to_datetime, datetime_to_string, grant_permissions
 
 class Region:
     def __init__(self, name, polygon, interval, sub_regions=[]):
@@ -26,28 +26,30 @@ class Region:
         self.clip_sub_regions()
 
     def clip_sub_regions(self):
-        timestamp = self.last_update
+        timestamp_str = datetime_to_string(self.last_update)
         for sub_region in self.sub_regions:
             clipped_polygon_path = clip_polygon(
                 input_path=self.latest_state_path, 
                 polygon_path=sub_region.polygon.path,
-                input_timestamp=timestamp,
+                input_timestamp=timestamp_str,
                 output_base_path=os.path.join(self.get_ancestors_path(config.RESULTS_PATH), sub_region.polygon.name),
                 exist_ok=True)
-            clipped_polygon_path = set_osm_file_timestamp(clipped_polygon_path, timestamp)
+            clipped_polygon_path = set_osm_file_timestamp(clipped_polygon_path, timestamp_str)
             grant_permissions(clipped_polygon_path)
-            sub_region.set_state(clipped_polygon_path, timestamp)
+            sub_region.set_state(clipped_polygon_path, self.last_update)
     
     def get_changes(self, based_on_file):
+        compressed_format = config.FORMATS_MAP['OSC_GZ']
         if (based_on_file):
             return get_changes_from_file(input_path=self.latest_state_path,
-                                         change_format='osc.gz')
+                                         change_format=compressed_format)
         return get_changes_from_timestamp(
             input_timestamp=datetime_to_string(self.last_update),
-            change_format='osc.gz')
+            change_format=compressed_format)
     
     def update(self, based_on_file=True):
-        # get the changes from global using osm-update
+        # get the changes from global osm using osm-update
+        # TODO: use cache system
         try:
             changes_path = self.get_changes(based_on_file)
         except:
@@ -68,7 +70,7 @@ class Region:
         grant_permissions(updated_path)
 
         # set the updated state of the region, this will also set the state of the sub-regions and clip their polygons
-        self.set_state(updated_path, changes_timestamp)
+        self.set_state(updated_path, string_to_datetime(changes_timestamp))
         return True
 
     def create_states_delta(self):
@@ -98,7 +100,7 @@ class Region:
         return f'{name2}.{timestamp2}.{timestamp1}'
 
     def set_next_update(self):
-        self.next_update = string_to_datetime(self.last_update) + timedelta(seconds=self.interval)
+        self.next_update = self.last_update + timedelta(seconds=self.interval)
 
     def calculate_closest_next_update(self, min=None):
         for sub_region in self.sub_regions:

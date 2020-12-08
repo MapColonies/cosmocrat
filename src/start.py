@@ -6,8 +6,10 @@ import config
 
 from datetime import timedelta
 from region import Region
+from update_manager import UpdateManager
+from update_job import UpdateJob
 from osm_tools.osmconvert import get_osm_file_timestamp
-from helper_functions import get_current_datetime, datetime_to_string, grant_permissions
+from helper_functions import get_current_datetime, datetime_to_string, string_to_datetime
 from config import log
 
 regions_to_update = []
@@ -19,7 +21,7 @@ class Polygon:
 
 def initialize_environment():
     # TODO: read configuration
-    
+
     # polygons
     tel_aviv_polygon = Polygon('Tel_Aviv', os.path.join(config.POLYGONS_PATH, 'telaviv.poly'))
     tel_aviv_center_polygon = Polygon('Tel_Aviv_Center', os.path.join(config.POLYGONS_PATH, 'telaviv_center.poly'))
@@ -37,7 +39,8 @@ def initialize_environment():
 
     # TODO: file system object and calculate latest state
     starting_state = os.path.join(config.REGIONS_PATH, 'israel-and-palestine-latest.osm.pbf')
-    israel.set_state(starting_state, get_osm_file_timestamp(starting_state))
+    starting_timestamp = get_osm_file_timestamp(starting_state)
+    israel.set_state(starting_state, string_to_datetime(starting_timestamp))
     regions_to_update.append(israel)
 
 def sleep_til_next_update(closest_update):
@@ -46,7 +49,7 @@ def sleep_til_next_update(closest_update):
     log.info(f'going to sleep until {datetime_to_string(closest_update)}')
     pause.until(closest_update)
 
-# TODO: work with unix times
+# TODO: queue updates
 def main():
     log.info(f'{config.app_name} started')
     initialize_environment()
