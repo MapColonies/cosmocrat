@@ -93,7 +93,7 @@ def get_file_timestamps(input):
     rest = remove_datetime_from_string(input)
     return (success, timestamps, rest)
 
-# TODO: create path class
+# TODO: should create class?
 def deconstruct_file_path(string):
     (_, format, string) = get_file_format(string)
     (_, dir, string) = get_file_dir(string)

@@ -12,8 +12,7 @@ from helper_functions import string_to_datetime, read_file, dictionary_has_key, 
 # TODO: support remote files
 # TODO: validate polygon
 # TODO: support polygon in geojson
-# TODO: polygon name?
-# TODO: file system object and calculate latest state
+# TODO: determine polygon name?
 # TODO: should update the configuration in every interval
 class ConfigurationHandler():
     def __init__(self, path, exception_func):

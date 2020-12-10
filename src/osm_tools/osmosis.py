@@ -30,7 +30,6 @@ def apply_changes_by_polygon(base_output_path, input_path, change_path, polygon_
     if len(changes_timestamps) is 2:
         changes_timestamps = changes_timestamps[1]
 
-    # TODO: remove
     os.makedirs(base_output_path, exist_ok=True)
 
     output_format = constants.FORMATS_MAP['OSM_PBF']

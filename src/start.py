@@ -15,7 +15,7 @@ from constants import log
 regions_to_update = []
 
 def initialize_environment():
-    # TODO: load configuration better
+    # TODO: better way to load configuration
     config = ConfigurationHandler(constants.CONFIGURATION_PATH, log_and_exit)
     regions_to_update.extend(config.regions)
 
@@ -36,7 +36,6 @@ def main():
             next_region_update = region.calculate_closest_next_update()
             if not closest_update or closest_update > next_region_update:
                 closest_update = next_region_update
-            # TODO: determine when to set a region state and create its deltas
         sleep_til_next_update(closest_update)
 
 if __name__ == '__main__':
