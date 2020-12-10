@@ -9,14 +9,14 @@ from datetime import timedelta
 from region import Region
 from entities.polygon import Polygon
 from osm_tools.osmconvert import get_osm_file_timestamp
-from helper_functions import get_current_datetime, datetime_to_string, string_to_datetime
+from helper_functions import get_current_datetime, datetime_to_string, string_to_datetime, log_and_exit
 from constants import log
 
 regions_to_update = []
 
 def initialize_environment():
     # TODO: load configuration better
-    config = ConfigurationHandler(constants.CONFIGURATION_PATH)
+    config = ConfigurationHandler(constants.CONFIGURATION_PATH, log_and_exit)
     regions_to_update.extend(config.regions)
 
 def sleep_til_next_update(closest_update):
@@ -25,7 +25,6 @@ def sleep_til_next_update(closest_update):
     log.info(f'going to sleep until {datetime_to_string(closest_update)}')
     pause.until(closest_update)
 
-# TODO: work with unix times
 def main():
     log.info(f'{constants.app_name} started')
     initialize_environment()

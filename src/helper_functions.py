@@ -1,9 +1,11 @@
+import sys
 import os
 import re
 import constants
 import subprocess
 import pytz
 import requests
+import json
 
 from datetime import datetime, timedelta, timezone
 from osmeterium.run_command import run_command
@@ -27,6 +29,10 @@ def handle_subprocess_exit_code(exit_code):
     log.error(fr'The subprocess raised an error: {exit_code}')
     raise
 
+def log_and_exit(exception_message):
+    log.error(exception_message)
+    sys.exit(1)
+
 def subprocess_get_stdout_output(args, remove_new_lines=True):
     completed_process = subprocess.run(args=args,
                                         stdout=subprocess.PIPE,
@@ -46,13 +52,6 @@ def run_command_wrapper(command):
                 process_log.info,
                 handle_subprocess_exit_code,
                 (lambda: log.info('subprocess finished successfully.')))
-
-# def get_file_name_from_path(input, suffix, remove_datetime = False):
-#     format_removed = input[:input.rfind(suffix)]
-#     result = format_removed[format_removed.rfind('/') + 1:]
-#     if remove_datetime:
-#         result = remove_datetime_from_string(result)
-#     return remove_dots_from_edges_of_string(result)
     
 def remove_datetime_from_string(input):
     return re.sub(constants.TIMESTAMP_REGEX, '', input)
@@ -114,6 +113,21 @@ def get_compression_method(compression, default_format=''):
 
 def grant_permissions(path, permissions=constants.DEFAULT_FILE_PERMISSIONS):
     os.chmod(path, permissions)
+
+def dictionary_has_key(dictionary, key):
+    return key in dictionary and dictionary[key]
+
+def read_file(file_path, is_json, throw_not_found=False):
+    if os.path.isfile(file_path):
+        with open(file_path, 'r') as opened_file:
+            if is_json:
+                return json.load(opened_file)
+            else:
+                return opened_file.read()
+    else:
+        log.error(f'file {file_path} not found')
+        if throw_not_found:
+            raise FileNotFoundError(f'could not find the file on the specified path: {file_path}')
 
 def request_file_from_url(server_url, path):
     url = '/'.join([server_url, path])

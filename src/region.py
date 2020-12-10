@@ -13,7 +13,6 @@ class Region:
         self.polygon = polygon
         self.interval = interval
         self.ancestors = []
-        # self.set_sub_regions(sub_regions)
         self.sub_regions = []
         self.latest_state_path = None
         self.second_latest_state_path = None
@@ -37,16 +36,16 @@ class Region:
                 exist_ok=True)
             clipped_polygon_path = set_osm_file_timestamp(clipped_polygon_path, timestamp_str)
             grant_permissions(clipped_polygon_path)
-            sub_region.set_state(clipped_polygon_path, timestamp_str)
+            sub_region.set_state(clipped_polygon_path, self.last_update)
     
     def get_changes(self, based_on_file):
         compressed_format = constants.FORMATS_MAP['OSC_GZ']
         if (based_on_file):
             return get_changes_from_file(input_path=self.latest_state_path,
-                                         change_format='osc.gz')
+                                         change_format=compressed_format)
         return get_changes_from_timestamp(
             input_timestamp=datetime_to_string(self.last_update),
-            change_format='osc.gz')
+            change_format=compressed_format)
     
     def update(self, based_on_file=True):
         # get the changes from global using osm-update
@@ -108,14 +107,6 @@ class Region:
         if not min or min > self.next_update:
             min = self.next_update
         return min
-
-    #TODO: remove?
-    def set_sub_regions(self, sub_regions):
-        new_sub_regions = []
-        self.sub_regions = new_sub_regions.extend(sub_regions)
-        for sub_region in sub_regions:
-            sub_region.ancestors.extend(self.ancestors)
-            sub_region.ancestors.append(self.name)
     
     def add_sub_region(self, sub_region):
         self.sub_regions.append(sub_region)
