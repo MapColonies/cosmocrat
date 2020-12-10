@@ -7,6 +7,9 @@ name = "pypi"
 mapcoloniesjsonlogger = "==1.0.0"
 osmeterium = "==0.0.1"
 pause = "==0.3"
+pep8 = "*"
+pylint = "*"
+requests = "*"
 
 [dev-packages]
 

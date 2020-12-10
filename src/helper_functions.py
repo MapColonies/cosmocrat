@@ -1,12 +1,13 @@
 import os
 import re
-import config
+import constants
 import subprocess
 import pytz
+import requests
 
 from datetime import datetime, timedelta, timezone
 from osmeterium.run_command import run_command
-from config import log, process_log
+from constants import log, process_log
 
 def get_current_datetime():
     return datetime.now(tz=timezone.utc)
@@ -54,7 +55,7 @@ def run_command_wrapper(command):
 #     return remove_dots_from_edges_of_string(result)
     
 def remove_datetime_from_string(input):
-    return re.sub(config.TIMESTAMP_REGEX, '', input)
+    return re.sub(constants.TIMESTAMP_REGEX, '', input)
     
 def remove_dots_from_edges_of_string(input):
     output = re.sub(r'(^[.])|([.]$)', '', input)
@@ -66,7 +67,7 @@ def get_file_format(input):
     format = ''
     successful = False
     rest = input
-    for format_value in config.FORMATS_MAP.values():
+    for format_value in constants.FORMATS_MAP.values():
         index = input.find(format_value)
         if index is not -1 and len(format) < len(format_value):
             format = format_value
@@ -86,7 +87,7 @@ def get_file_dir(input):
 def get_file_timestamps(input):
     timestamps = []
     success = False
-    for match in re.finditer(config.TIMESTAMP_REGEX, input):
+    for match in re.finditer(constants.TIMESTAMP_REGEX, input):
         success = True
         timestamp = match.group(0)
         timestamps.append(timestamp)
@@ -111,5 +112,10 @@ def get_compression_method(compression, default_format=''):
         compression_format += '.gz'
     return (compression_type, compression_format)
 
-def grant_permissions(path, permissions=config.DEFAULT_FILE_PERMISSIONS):
+def grant_permissions(path, permissions=constants.DEFAULT_FILE_PERMISSIONS):
     os.chmod(path, permissions)
+
+def request_file_from_url(server_url, path):
+    url = '/'.join([server_url, path])
+    result = requests.get(url)
+    return (result.ok, result.text)

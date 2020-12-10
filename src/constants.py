@@ -10,9 +10,10 @@ OSMOSIS_PATH='/home/amito/src/osmosis/bin/osmosis'
 OSMUPDATE_PATH='/home/amito/src/osmupdate/osmctools/src/a.out'
 OSMCONVERT_PATH='/home/amito/src/osmconvert/osmconvert'
 
-DEFAULT_SLEEP_INTERVAL=300
+DEFAULT_INTERVAL=3600
 DEFAULT_FILE_PERMISSIONS=0o644
 APP_PATH = '/home/amito/src/cosmocrat'
+CONFIGURATION_PATH = os.path.join(APP_PATH, 'configuration.json')
 DATA_PATH = os.path.join(APP_PATH, 'data')
 POLYGONS_PATH = os.path.join(DATA_PATH, 'polygons')
 REGIONS_PATH = os.path.join(DATA_PATH, 'regions')
