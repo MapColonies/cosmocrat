@@ -1,7 +1,7 @@
 import sys
 import os
 import re
-import constants
+import definitions
 import subprocess
 import pytz
 import requests
@@ -9,7 +9,7 @@ import json
 
 from datetime import datetime, timedelta, timezone
 from osmeterium.run_command import run_command
-from constants import log, process_log
+from definitions import log, process_log
 
 def get_current_datetime():
     return datetime.now(tz=timezone.utc)
@@ -33,18 +33,16 @@ def log_and_exit(exception_message):
     log.error(exception_message)
     sys.exit(1)
 
-def subprocess_get_stdout_output(args, remove_new_lines=True):
+def subprocess_get_stdout_output(args):
     completed_process = subprocess.run(args=args,
                                         stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE,
                                         universal_newlines=True)
                                         
     if completed_process.returncode is not 0:
-        raise
+        return None
     output = completed_process.stdout
-    if remove_new_lines: 
-        return output.replace('\n', '')
-    return output
+    return output.strip()
 
 def run_command_wrapper(command):
     run_command(command,
@@ -54,7 +52,7 @@ def run_command_wrapper(command):
                 (lambda: log.info('subprocess finished successfully.')))
     
 def remove_datetime_from_string(input):
-    return re.sub(constants.TIMESTAMP_REGEX, '', input)
+    return re.sub(definitions.TIMESTAMP_REGEX, '', input)
     
 def remove_dots_from_edges_of_string(input):
     output = re.sub(r'(^[.])|([.]$)', '', input)
@@ -66,7 +64,7 @@ def get_file_format(input):
     format = ''
     successful = False
     rest = input
-    for format_value in constants.FORMATS_MAP.values():
+    for format_value in definitions.FORMATS_MAP.values():
         index = input.find(format_value)
         if index is not -1 and len(format) < len(format_value):
             format = format_value
@@ -86,7 +84,7 @@ def get_file_dir(input):
 def get_file_timestamps(input):
     timestamps = []
     success = False
-    for match in re.finditer(constants.TIMESTAMP_REGEX, input):
+    for match in re.finditer(definitions.TIMESTAMP_REGEX, input):
         success = True
         timestamp = match.group(0)
         timestamps.append(timestamp)
@@ -111,19 +109,16 @@ def get_compression_method(compression, default_format=''):
         compression_format += '.gz'
     return (compression_type, compression_format)
 
-def grant_permissions(path, permissions=constants.DEFAULT_FILE_PERMISSIONS):
+def grant_permissions(path, permissions=definitions.DEFAULT_FILE_PERMISSIONS):
     os.chmod(path, permissions)
 
-def dictionary_has_key(dictionary, key):
+def dictionary_has_non_none_key(dictionary, key):
     return key in dictionary and dictionary[key]
 
-def read_file(file_path, is_json, throw_not_found=False):
+def read_file(file_path, throw_not_found=False):
     if os.path.isfile(file_path):
         with open(file_path, 'r') as opened_file:
-            if is_json:
-                return json.load(opened_file)
-            else:
-                return opened_file.read()
+            return json.load(opened_file)
     else:
         log.error(f'file {file_path} not found')
         if throw_not_found:

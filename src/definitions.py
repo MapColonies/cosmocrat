@@ -1,19 +1,23 @@
-import os 
+import os
+import sys
 import pytz
-
 from enum import Enum
 from MapColoniesJSONLogger.logger import generate_logger
 
 app_name = 'cosmocrat'
 
-OSMOSIS_PATH='/home/amito/src/osmosis/bin/osmosis'
-OSMUPDATE_PATH='/home/amito/src/osmupdate/osmctools/src/a.out'
-OSMCONVERT_PATH='/home/amito/src/osmconvert/osmconvert'
+OSMOSIS_PATH='/usr/bin/osmosis'
+OSMUPDATE_PATH='/usr/bin/osmupdate'
+OSMCONVERT_PATH='/usr/bin/osmconvert'
 
-DEFAULT_INTERVAL=3600
+# file owner has read/write access, group and other users only read access
+# needed for reading and updating the timestamp tag on the osm files
 DEFAULT_FILE_PERMISSIONS=0o644
-APP_PATH = '/home/amito/src/cosmocrat'
-CONFIGURATION_PATH = os.path.join(APP_PATH, 'configuration.json')
+
+DEFAULT_INTERVAL_SECONDS=3600
+# TODO: look for best practice
+APP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+CONFIGURATION_PATH = os.path.join(APP_PATH, 'config.json')
 DATA_PATH = os.path.join(APP_PATH, 'data')
 POLYGONS_PATH = os.path.join(DATA_PATH, 'polygons')
 REGIONS_PATH = os.path.join(DATA_PATH, 'regions')

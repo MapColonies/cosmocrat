@@ -2,6 +2,7 @@ data
 .vscode
 log
 nginx
+config.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

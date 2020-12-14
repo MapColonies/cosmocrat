@@ -1,5 +1,5 @@
 import os
-import constants
+import definitions
 
 from datetime import timedelta
 from osm_tools.osmosis import clip_polygon, apply_changes_by_polygon, create_delta
@@ -32,14 +32,14 @@ class Region:
                 input_path=self.latest_state_path, 
                 polygon_path=sub_region.polygon.path,
                 input_timestamp=timestamp_str,
-                output_base_path=os.path.join(self.get_ancestors_path(constants.RESULTS_PATH), sub_region.polygon.name),
+                output_base_path=os.path.join(self.get_ancestors_path(definitions.RESULTS_PATH), sub_region.polygon.name),
                 exist_ok=True)
             clipped_polygon_path = set_osm_file_timestamp(clipped_polygon_path, timestamp_str)
             grant_permissions(clipped_polygon_path)
             sub_region.set_state(clipped_polygon_path, self.last_update)
     
     def get_changes(self, based_on_file):
-        compressed_format = constants.FORMATS_MAP['OSC_GZ']
+        compressed_format = definitions.FORMATS_MAP['OSC_GZ']
         if (based_on_file):
             return get_changes_from_file(input_path=self.latest_state_path,
                                          change_format=compressed_format)
@@ -55,7 +55,7 @@ class Region:
             return False
 
         # apply the changes on the last state and bound by polygon using osmosis
-        updated_path = apply_changes_by_polygon(base_output_path=self.get_ancestors_path(constants.RESULTS_PATH),
+        updated_path = apply_changes_by_polygon(base_output_path=self.get_ancestors_path(definitions.RESULTS_PATH),
                                                 input_path=self.latest_state_path,
                                                 change_path=changes_path,
                                                 polygon_path=self.polygon.path,
@@ -73,7 +73,7 @@ class Region:
         return True
 
     def create_states_delta(self):
-        delta_path = create_delta(delta_path=self.get_ancestors_path(constants.DELTAS_PATH),
+        delta_path = create_delta(delta_path=self.get_ancestors_path(definitions.DELTAS_PATH),
                     delta_name=self.get_delta_name(),
                     first_input_pbf_path=self.second_latest_state_path,
                     second_input_pbf_path=self.latest_state_path,

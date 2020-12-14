@@ -1,5 +1,5 @@
 import os
-import constants
+import definitions
 
 from uuid import uuid4
 from helper_functions import subprocess_get_stdout_output, run_command_wrapper, deconstruct_file_path
@@ -8,23 +8,20 @@ def convert_changefile_format(input_path, input_format, output_format):
     if input_format is output_format:
         return
     (_, input_name, _, _) = deconstruct_file_path(input_path)
-    output_path = os.path.join(constants.OSMCHANGES_PATH, output_format, f'{input_name}.{output_format}')
-    run_command_wrapper(f'{constants.OSMCONVERT_PATH} \
+    output_path = os.path.join(definitions.OSMCHANGES_PATH, output_format, f'{input_name}.{output_format}')
+    run_command_wrapper(f'{definitions.OSMCONVERT_PATH} \
                     {input_path} \
                     -o={output_path} \
                     --verbose')
 
 def get_osm_file_timestamp(file_path):
-    command = [constants.OSMCONVERT_PATH, '--out-timestamp', file_path, '--verbose']
-    try:
-        return subprocess_get_stdout_output(command)
-    except:
-        raise
+    command = [definitions.OSMCONVERT_PATH, '--out-timestamp', file_path, '--verbose']
+    return subprocess_get_stdout_output(command)
 
 def set_osm_file_timestamp(input_path, new_timestamp):
     (dir, name, _, input_format) = deconstruct_file_path(input_path)
     temp_path = os.path.join(dir, f'{str(uuid4())}.{input_format}')
-    run_command_wrapper(f'{constants.OSMCONVERT_PATH} \
+    run_command_wrapper(f'{definitions.OSMCONVERT_PATH} \
                     {input_path} \
                     --timestamp={new_timestamp} \
                     -o={temp_path} \
@@ -37,7 +34,7 @@ def set_osm_file_timestamp(input_path, new_timestamp):
 def drop_author(input_path):
     (dir, _, _, input_format) = deconstruct_file_path(input_path)
     temp_path = os.path.join(dir, f'{str(uuid4())}.{input_format}')
-    run_command_wrapper(f'{constants.OSMCONVERT_PATH} \
+    run_command_wrapper(f'{definitions.OSMCONVERT_PATH} \
                     --drop-author \
                     {input_path} \
                     -o={temp_path} \

@@ -2,41 +2,42 @@
 import os
 import re
 import pause
-import constants
+import definitions
 
-from config.configuration_handler import ConfigurationHandler
+from config.configuration import Configuration
 from datetime import timedelta
-from region import Region
+from entities.region import Region
 from entities.polygon import Polygon
 from osm_tools.osmconvert import get_osm_file_timestamp
 from helper_functions import get_current_datetime, datetime_to_string, string_to_datetime, log_and_exit
-from constants import log
+from definitions import log
 
-regions_to_update = []
+def load_config():
+    try:
+        return Configuration(definitions.CONFIGURATION_PATH)
+    except FileNotFoundError:
+        log_and_exit(f'Could not locate configuration in the given path {definitions.CONFIGURATION_PATH}')
+    except:
+        log_and_exit('An Error occurred while loading the configuration.')
 
-def initialize_environment():
-    # TODO: better way to load configuration
-    config = ConfigurationHandler(constants.CONFIGURATION_PATH, log_and_exit)
-    regions_to_update.extend(config.regions)
-
-def sleep_til_next_update(closest_update):
+def sleep_til_next_update(closest_update, default_interval):
     if not closest_update:
-        closest_update = get_current_datetime() + timedelta(seconds=constants.DEFAULT_INTERVAL)
+        closest_update = get_current_datetime() + timedelta(seconds=default_interval)
     log.info(f'going to sleep until {datetime_to_string(closest_update)}')
     pause.until(closest_update)
 
 def main():
-    log.info(f'{constants.app_name} started')
-    initialize_environment()
+    log.info(f'{definitions.app_name} started')
+    config = load_config()
     while True:
         closest_update = None
-        for region in regions_to_update:
+        for region in config.regions:
             if region.update():
                 region.create_states_delta()
             next_region_update = region.calculate_closest_next_update()
             if not closest_update or closest_update > next_region_update:
                 closest_update = next_region_update
-        sleep_til_next_update(closest_update)
+        sleep_til_next_update(closest_update, default_interval=config.interval)
 
 if __name__ == '__main__':
     main()

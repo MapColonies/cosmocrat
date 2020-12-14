@@ -1,33 +1,31 @@
 import os
-import constants
+import definitions
 
-from region import Region
+from entities.region import Region
 from entities.polygon import Polygon
 from osm_tools.osmconvert import get_osm_file_timestamp
-from helper_functions import string_to_datetime, read_file, dictionary_has_key, handle_subprocess_exit_code
+from helper_functions import string_to_datetime, read_file, dictionary_has_non_none_key, handle_subprocess_exit_code
 
-# TODO: create config_map
 # TODO: support inner states?
-# TODO: handle exceptions
 # TODO: support remote files
 # TODO: validate polygon
 # TODO: support polygon in geojson
 # TODO: determine polygon name?
 # TODO: should update the configuration in every interval
-class ConfigurationHandler():
-    def __init__(self, path, exception_func):
-        self.path = os.path.join(constants.DATA_PATH)
-        self.interval = constants.DEFAULT_INTERVAL
+class Configuration():
+    def __init__(self, path):
+        self.path = path
+        self.interval = definitions.DEFAULT_INTERVAL_SECONDS
         self.regions = []
-        self.exception_func = exception_func
         self.load_config()
 
     def load_config(self):
         try:
-            data = read_file(file_path=self.path, is_json=True, throw_not_found=True)
+            data = read_file(file_path=self.path, throw_not_found=True)
+        except FileNotFoundError:
+            raise FileNotFoundError()
         except:
-            # legit?
-            self.exception_func('Failed while reading configuration.')
+            raise Exception()
         self.interval = data['interval_seconds']
         for region in data['regions']:
             (region_entity, state_path) = self.create_region_entity(region)
@@ -37,14 +35,14 @@ class ConfigurationHandler():
 
     def create_region_entity(self, data):
         name = data['name']
-        if dictionary_has_key(data, 'state'):
+        if dictionary_has_non_none_key(data, 'state'):
             state_path = data['state']
         else:
             state_path = None
         polygon_path = data['polygon']
         polygon_entity = Polygon(name, polygon_path)
         region_entity = Region(name, polygon_entity, self.interval)
-        if dictionary_has_key(data, 'regions'):
+        if dictionary_has_non_none_key(data, 'regions'):
             for sub_region in data['regions']:
                 (sub_region_entity, _) = self.create_region_entity(sub_region)
                 region_entity.add_sub_region(sub_region_entity)
