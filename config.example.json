@@ -1,0 +1,22 @@
+{
+    "interval_seconds": 3600,
+    "regions": [
+        {
+            "name": "Some_Region",
+            "state": "some_region_latest_state.osm.pbf",
+            "polygon": "some_region.poly",
+            "regions": [
+                {
+                    "name": "Some_Sub_Region",
+                    "polygon": "some_sub_region.poly",
+                    "regions": null
+                }
+            ]
+        },
+        {
+            "name": "Some_Other_Region",
+            "state": "some_other_region_latest_state.osm.pbf",
+            "polygon": "some_other_region.poly"
+        }
+    ]
+}
